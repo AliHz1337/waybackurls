@@ -145,8 +145,6 @@ type wurl struct {
 	url  string
 }
 
-type fetchFn func(string, bool) ([]wurl, error)
-
 // New streaming version of getWaybackURLs
 func getWaybackURLsStreaming(domain string, noSubs bool, output chan<- wurl) {
 	subsWildcard := "*."
@@ -256,8 +254,7 @@ func getVirusTotalURLs(domain string, noSubs bool) ([]wurl, error) {
 	}{}
 
 	dec := json.NewDecoder(resp.Body)
-
-	err = dec.Decode(&wrapper)
+	_ = dec.Decode(&wrapper)
 
 	for _, u := range wrapper.URLs {
 		out = append(out, wurl{url: u.URL})
@@ -275,7 +272,7 @@ func isSubdomain(rawUrl, domain string) bool {
 		return false
 	}
 
-	return strings.ToLower(u.Hostname()) != strings.ToLower(domain)
+	return !strings.EqualFold(u.Hostname(), domain)
 }
 
 func getVersions(u string) ([]string, error) {
